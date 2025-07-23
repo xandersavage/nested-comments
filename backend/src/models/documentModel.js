@@ -10,6 +10,11 @@ const documentSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    type: {
+      type: String,
+      required: true,
+      enum: ['research', 'proposal', 'documentation', 'other'],
+    },
     author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

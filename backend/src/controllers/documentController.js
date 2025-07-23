@@ -2,10 +2,10 @@ import { Document } from '../models/documentModel.js';
 
 export const createDocument = async (req, res) => {
   try {
-    const { title, content } = req.body;
+    const { title, content, type } = req.body;
     const author = req.user._id;
 
-    const newDocument = await Document.create({ title, content, author });
+    const newDocument = await Document.create({ title, content, author, type });
     res.status(201).json(newDocument);
   } catch (error) {
     res

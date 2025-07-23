@@ -10,6 +10,14 @@ const postSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    likes: {
+      type: Number,
+      default: 0,
+    },
+    type: {
+      type: String,
+      default: 'general',
+    },
     author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User', // Reference to the User model

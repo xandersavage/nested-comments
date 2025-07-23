@@ -1,5 +1,6 @@
 import React from "react";
 import PostCard from "./PostCard.jsx";
+import { ALL_POSTS_DATA } from "../data/postsData.js";
 
 const PostList = () => {
   return (
@@ -8,7 +9,9 @@ const PostList = () => {
       <p className={`text-gray-700 text-lg text-center mb-5`}>
         Engage with blog content through threaded discussions
       </p>
-      <PostCard />
+      {ALL_POSTS_DATA.map((post) => (
+        <PostCard key={post.id} post={post} />
+      ))}
     </>
   );
 };

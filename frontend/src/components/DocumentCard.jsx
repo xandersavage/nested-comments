@@ -1,51 +1,54 @@
 import React from "react";
 import {
-  FaHeart,
-  FaRegClock,
-  FaUser,
-  FaRegComment,
+  FaDownload,
   FaPaperPlane,
+  FaRegClock,
+  FaRegComment,
+  FaUser,
 } from "react-icons/fa6";
-import { ALL_COMMENTS_DATA } from "../data/commentsData.js";
 import CommentWrapper from "./CommentWrapper.jsx";
+import { ALL_COMMENTS_DATA } from "../data/commentsData.js";
+import { FaFileAlt } from "react-icons/fa";
 
-const PostCard = ({ post }) => {
-  const commentsForThisPost = ALL_COMMENTS_DATA.filter(
-    (comment) => comment.type === "post",
+const DocumentCard = ({ document }) => {
+  const commentsForThisDocument = ALL_COMMENTS_DATA.filter(
+    (comment) => comment.type === "document",
   );
-
   return (
     <div
-      className={`px-10 py-5 border rounded-lg border-l-blue-400 border-l-4 border-gray-300 mb-5`}
+      className={`px-10 py-5 border rounded-lg border-l-purple-400 border-l-4 border-gray-300 mb-5`}
     >
       <div className="flex items-center justify-between gap-4 mb-3">
-        <h3 className="text-2xl font-semibold my-0">{post.title}</h3>
-        <div className="bg-blue-100 text-blue-500 text-sm font-bold rounded-3xl p-2">
-          {post.type}
+        <div className="flex items-center gap-2">
+          <FaFileAlt className={`text-xl text-purple-400`} />
+          <h3 className="text-2xl font-semibold my-0">{document.title}</h3>
+        </div>
+        <div className="text-sm font-bold rounded-3xl p-1 px-2 bg-purple-100 text-purple-500">
+          Documentation
         </div>
       </div>
-      <p className="text-gray-500">{post.content}</p>
+      <p className="text-gray-500">{document.content}</p>
       <div className="flex gap-6 mt-5 mb-5">
         <div className="flex items-center gap-2">
-          <FaUser className={`text-gray-400`} />
-          <p>{post.author}</p>
+          <FaUser className={`text-gray-400 hidden sm:block`} />
+          <p>{document.author}</p>
         </div>
         <div className="flex items-center gap-2">
-          <FaRegClock className={`text-gray-400`} />
-          <p className="">{post.createdAt}</p>
+          <FaRegClock className={`text-gray-400 hidden sm:block`} />
+          <p className="">{document.timestamp}</p>
         </div>
         <div className="flex items-center gap-2">
-          <FaHeart className={`text-gray-400`} />
-          <p className="">{`${post.likes} Likes`}</p>
+          <FaDownload className={`text-gray-400 hidden sm:block`} />
+          <p className="">{document.size}</p>
         </div>
       </div>
       <div className="flex items-center gap-2 mb-4">
-        <FaRegComment className={`text-blue-400 text-2xl`} />
-        <p className="font-semibold text-xl">Discussion</p>
+        <FaRegComment className={`text-purple-400 text-2xl`} />
+        <p className="font-semibold text-xl">Review & Feedback</p>
       </div>
       <textarea
-        className="w-full border border-gray-300 rounded-md px-3 py-2 min-h-[120px] resize-none mb-4" // Adjusted min-h and added py-2, resize-y
-        placeholder={`Share your thoughts about this post...`}
+        className="w-full border border-gray-300 rounded-md px-3 py-2 min-h-[120px] resize-none mb-4"
+        placeholder={`Share your thoughts about this document...`}
       ></textarea>
       <div className="flex gap-4 items-center bg-gradient-to-r from-purple-300 via-purple-300 to-pink-300 text-white w-40 py-2 px-2 rounded-md hover:shadow hover:cursor-pointer">
         <FaPaperPlane />
@@ -64,7 +67,7 @@ const PostCard = ({ post }) => {
                          so it won't apply an initial indentation or hierarchy line.
                          The Comment component then handles increasing this depth for its replies.
           */}
-        {commentsForThisPost.map((comment) => (
+        {commentsForThisDocument.map((comment) => (
           <CommentWrapper key={comment.id} comment={comment} depth={0} />
         ))}
       </div>
@@ -72,4 +75,4 @@ const PostCard = ({ post }) => {
   );
 };
 
-export default PostCard;
+export default DocumentCard;
