@@ -7,10 +7,11 @@ import {
 } from "react-icons/fa6";
 
 const CommentCard = ({ comment }) => {
+  console.log(comment)
   // Use comment data from props, with fallbacks for safety
   const authorName = comment?.author?.username || "Unknown User";
-  const timestamp = comment?.timestamp || "Just now";
-  const content = comment?.content || "No comment provided.";
+  const timestamp = comment?.createdAt || "Just now";
+  const content = comment?.text || "No comment provided.";
   const typeTag = comment?.type || "post";
 
   const [isOpen, setIsOpen] = useState(false);

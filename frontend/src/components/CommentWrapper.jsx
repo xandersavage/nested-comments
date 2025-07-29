@@ -29,14 +29,14 @@ const Comment = ({ comment, depth = 0 }) => {
       )}
 
       {/* Render the actual CommentCard, passing the comment data down */}
-      <CommentCard comment={comment} />
+      <CommentCard key={comment._id} comment={comment} />
 
       {/* Recursively render replies */}
       {comment.replies && comment.replies.length > 0 && (
         // No extra div or margin here, as the next Comment component will handle its own marginTopClass
         <div>
           {comment.replies.map((reply) => (
-            <Comment key={reply.id} comment={reply} depth={depth + 1} /> // Recursively call Comment with increased depth
+            <Comment key={reply._id} comment={reply} depth={depth + 1} /> // Recursively call Comment with increased depth
           ))}
         </div>
       )}

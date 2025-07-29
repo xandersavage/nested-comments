@@ -7,13 +7,22 @@ import {
   FaUser,
 } from "react-icons/fa6";
 import CommentWrapper from "./CommentWrapper.jsx";
-import { ALL_COMMENTS_DATA } from "../data/commentsData.js";
 import { FaFileAlt } from "react-icons/fa";
+import {useQuery} from "@tanstack/react-query";
+import {getCommentsForDocument} from "../services/commentService.js";
+import {countComment} from "../utils/countComments.js";
 
 const DocumentCard = ({ document }) => {
-  const commentsForThisDocument = ALL_COMMENTS_DATA.filter(
-    (comment) => comment.type === "document",
-  );
+  const {data: comments, isLoading: areCommentsLoading, isError: areCommentsError, error: commentsError} = useQuery({
+    queryKey: ['comments', document._id],
+    queryFn: ({queryKey}) => getCommentsForDocument(queryKey[1]),
+    enabled: !!document._id,
+    staleTime: 5 * 60 * 1000
+  })
+
+  const totalCommentCount = countComment(comments)
+  console.log(document)
+
   return (
     <div
       className={`px-10 py-5 border rounded-lg border-l-purple-400 border-l-4 border-gray-300 mb-5`}
@@ -31,15 +40,15 @@ const DocumentCard = ({ document }) => {
       <div className="flex gap-6 mt-5 mb-5">
         <div className="flex items-center gap-2">
           <FaUser className={`text-gray-400 hidden sm:block`} />
-          <p>{document.author}</p>
+          <p>{document.author.username}</p>
         </div>
         <div className="flex items-center gap-2">
           <FaRegClock className={`text-gray-400 hidden sm:block`} />
-          <p className="">{document.timestamp}</p>
+          <p className="">{new Date(document.createdAt).toLocaleDateString()}</p>
         </div>
         <div className="flex items-center gap-2">
           <FaDownload className={`text-gray-400 hidden sm:block`} />
-          <p className="">{document.size}</p>
+          <p className="">{document.size || `20MB`}</p>
         </div>
       </div>
       <div className="flex items-center gap-2 mb-4">
@@ -55,9 +64,17 @@ const DocumentCard = ({ document }) => {
         <p className={`text-md font-semibold`}>Add Comment</p>
       </div>
       <div className="mt-5 mb-4 border border-b-gray-300 border-white py-3">
-        <p className="font-semibold text-xl">2 Comments</p>
+        <p className="font-semibold text-xl">{totalCommentCount} Comment{totalCommentCount !== 1 ? 's' : ''}</p>
       </div>
       <div className="mt-6 space-y-4">
+        {areCommentsLoading && (
+            <p className={`text-gray-500 text-center`}>Loading Comments...</p>
+        )}
+        {areCommentsError && (
+            <p className="text-red-500 text-center">
+              Error loading comments: {commentsError?.message}
+            </p>
+        )}
         {/*
             We map over the top-level comments (those with no parent).
             For each top-level comment, we render a 'Comment' component.
@@ -67,9 +84,13 @@ const DocumentCard = ({ document }) => {
                          so it won't apply an initial indentation or hierarchy line.
                          The Comment component then handles increasing this depth for its replies.
           */}
-        {commentsForThisDocument.map((comment) => (
-          <CommentWrapper key={comment.id} comment={comment} depth={0} />
-        ))}
+        {comments && comments.length > 0 && !areCommentsLoading && !areCommentsError ? (
+            comments.map(comment => (
+                <CommentWrapper key={comment._id} comment={comment} depth={0} />
+            ))
+        ): (
+            !areCommentsLoading && !areCommentsError &&  <p className="text-gray-500 text-center">No comments yet. Be the first to comment!</p>
+        )}
       </div>
     </div>
   );

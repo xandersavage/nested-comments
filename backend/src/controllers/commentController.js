@@ -113,10 +113,10 @@ export const getCommentForPost = async (req, res) => {
       .sort({ createdAt: 1 }) // Sort from DB by creation date (important for buildCommentTree)
       .lean(); // Use .lean() for plain JavaScript objects for buildCommentTree performance
 
-    console.log('Raw comments found:', comments);
+    // console.log('Raw comments found:', comments);
 
     const nestedComments = buildCommentTree(comments); // Use our imported helper
-    console.log('Nested comments:', nestedComments);
+    // console.log('Nested comments:', nestedComments);
     res.status(200).json(nestedComments);
   } catch (e) {
     console.error('Error fetching comments for post:', e);

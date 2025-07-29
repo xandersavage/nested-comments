@@ -6,13 +6,21 @@ import {
   FaRegComment,
   FaPaperPlane,
 } from "react-icons/fa6";
-import { ALL_COMMENTS_DATA } from "../data/commentsData.js";
+import {getCommentsForPost} from "../services/commentService.js";
+import {useQuery} from "@tanstack/react-query";
 import CommentWrapper from "./CommentWrapper.jsx";
+import {countComment} from "../utils/countComments.js";
 
 const PostCard = ({ post }) => {
-  const commentsForThisPost = ALL_COMMENTS_DATA.filter(
-    (comment) => comment.type === "post",
-  );
+  const {data: comments, isLoading: areCommentsLoading, isError: areCommentsError, error: commentsError} = useQuery({
+    queryKey: ['comments', post._id], // Query key includes the post ID to make it unique for each post's comments
+    queryFn: ({queryKey}) => getCommentsForPost(queryKey[1]), // queryFn takes the query object, from which we can destructure queryKey
+    enabled: !!post._id, // Only run this query if post._id exists
+    staleTime: 5 * 60 * 1000,
+    // refetchOnWindowFocus: true
+  })
+
+  const totalCommentCount = countComment(comments)
 
   return (
     <div
@@ -28,11 +36,11 @@ const PostCard = ({ post }) => {
       <div className="flex gap-6 mt-5 mb-5">
         <div className="flex items-center gap-2">
           <FaUser className={`text-gray-400`} />
-          <p>{post.author}</p>
+          <p>{post.author.username}</p>
         </div>
         <div className="flex items-center gap-2">
           <FaRegClock className={`text-gray-400`} />
-          <p className="">{post.createdAt}</p>
+          <p className="">{new Date(post.createdAt).toLocaleDateString()}</p>
         </div>
         <div className="flex items-center gap-2">
           <FaHeart className={`text-gray-400`} />
@@ -52,9 +60,17 @@ const PostCard = ({ post }) => {
         <p className={`text-md font-semibold`}>Add Comment</p>
       </div>
       <div className="mt-5 mb-4 border border-b-gray-300 border-white py-3">
-        <p className="font-semibold text-xl">2 Comments</p>
+        <p className="font-semibold text-xl">{totalCommentCount} Comment{totalCommentCount !== 1 ? 's' : ''}</p>
       </div>
       <div className="mt-6 space-y-4">
+        {areCommentsLoading && (
+            <p className={`text-gray-500 text-center`}>Loading Comments...</p>
+        )}
+        {areCommentsError && (
+            <p className="text-red-500 text-center">
+              Error loading comments: {commentsError?.message}
+            </p>
+        )}
         {/*
             We map over the top-level comments (those with no parent).
             For each top-level comment, we render a 'Comment' component.
@@ -64,9 +80,13 @@ const PostCard = ({ post }) => {
                          so it won't apply an initial indentation or hierarchy line.
                          The Comment component then handles increasing this depth for its replies.
           */}
-        {commentsForThisPost.map((comment) => (
-          <CommentWrapper key={comment.id} comment={comment} depth={0} />
-        ))}
+        {comments && comments.length > 0 && !areCommentsLoading && !areCommentsError ? (
+            comments.map(comment => (
+                <CommentWrapper key={comment._id} comment={comment} depth={0} />
+            ))
+        ): (
+                !areCommentsLoading && !areCommentsError &&  <p className="text-gray-500 text-center">No comments yet. Be the first to comment!</p>
+        )}
       </div>
     </div>
   );

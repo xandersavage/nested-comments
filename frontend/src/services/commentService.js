@@ -1,12 +1,25 @@
-import axios from "axios";
-const BASE_URL = "http://localhost:3000/api";
+import api from './api.js'
 
-export const getComments = async (postId) => {
-  try {
-    const response = await axios.get(`${BASE_URL}/:id`, { postId });
-    return response;
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
-};
+export const getCommentsForPost = async (postId) => {
+    if (!postId) throw new Error('Post ID is required to fetch comments.')
+
+    try {
+        const response = await api.get(`/posts/${postId}/comments`)
+        return response.data
+    } catch (e) {
+        console.error(`Error fetching comments for post ${postId}:`, e)
+        throw e
+    }
+}
+
+export const getCommentsForDocument = async (docId) => {
+    if (!docId) throw new Error('Document ID is required to fetch comments')
+
+    try {
+        const response = await api.get(`/documents/${docId}/comments`)
+        return response.data
+    } catch (e) {
+        console.error(`Error fetching comments for document ${docId} `, e)
+        throw e
+    }
+}
