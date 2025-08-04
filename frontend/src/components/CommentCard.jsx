@@ -1,20 +1,51 @@
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import {
   FaCircleUser,
   FaReply,
   FaEllipsis,
   FaPaperPlane,
 } from "react-icons/fa6";
+import {useMutation, useQueryClient} from "@tanstack/react-query";
+import {createCommentReply} from "../services/commentService.js";
 
-const CommentCard = ({ comment }) => {
-  console.log(comment)
-  // Use comment data from props, with fallbacks for safety
+const CommentCard = ({ comment, parentType, parentId }) => {
+  const queryClient = useQueryClient()
+  const [isOpen, setIsOpen] = useState(false)
+  const [replyText, setReplyText] = useState('')
+
   const authorName = comment?.author?.username || "Unknown User";
-  const timestamp = comment?.createdAt || "Just now";
+  const timestamp = new Date(comment?.createdAt).toLocaleDateString() || "Just now";
   const content = comment?.text || "No comment provided.";
   const typeTag = comment?.type || "post";
 
-  const [isOpen, setIsOpen] = useState(false);
+  const {mutate, isPending: isReplying, isSuccess: isReplySuccess, isError: isReplyError, reset} = useMutation({
+    mutationFn: createCommentReply,
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ['comments', parentId]})
+      setReplyText('')
+      setIsOpen(false)
+    }
+  })
+
+  useEffect(() => {
+    if (isReplySuccess) {
+      const timer = setTimeout(() => {
+        reset()
+      }, 3000)
+      return () => clearTimeout(timer)
+    }
+  }, [isReplySuccess, reset]);
+
+  const handleReplySubmit = (e) => {
+    e.preventDefault()
+    if (replyText.trim()) {
+      mutate({parentCommentId: comment._id, text: replyText})
+    }
+  }
+
+  const handleReplyButtonClick = () => {
+    setIsOpen(prev => !prev)
+  }
 
   return (
     <div
@@ -41,7 +72,7 @@ const CommentCard = ({ comment }) => {
       <div className="flex gap-2 items-center ml-14 mb-2">
         <div
           className="flex gap-4 items-center hover:bg-gray-100 p-2 border border-white rounded-md"
-          onClick={() => setIsOpen(true)}
+          onClick={handleReplyButtonClick}
         >
           <FaReply />
           <p className="">Reply</p>
@@ -56,15 +87,25 @@ const CommentCard = ({ comment }) => {
         className={`px-12 ml-6 relative ${isOpen === true ? "block" : "hidden"}`}
       >
         <div className="absolute left-7 top-0 bottom-0 w-[2px] bg-gray-200"></div>
-        <textarea
+        <form onSubmit={handleReplySubmit}>
+          <textarea
           className="w-full border border-gray-300 rounded-md px-3 py-2 min-h-[120px] resize-none mb-1" // Adjusted min-h and added py-2, resize-y
           placeholder={`Write your reply`}
+          value={replyText}
+          onChange={(e) => setReplyText(e.target.value)}
         ></textarea>
+
+          {isReplying && <p className="text-blue-500 mb-2">Posting reply....</p>}
+          {isReplySuccess && <p className="text-green-500 mb-2">Reply posted successfully</p>}
+          {isReplyError && <p className="text-red-500 mb-2">Failed to post reply</p>}
+
         <div className="flex gap-3">
-          <div className="flex gap-4 items-center bg-gradient-to-r from-purple-300 via-purple-300 to-pink-300 text-white py-2 px-2 rounded-md hover:shadow hover:cursor-pointer">
+          <button className="flex gap-4 items-center bg-gradient-to-r from-purple-300 via-purple-300 to-pink-300 text-white py-2 px-2 rounded-md hover:shadow hover:cursor-pointer"
+          type={"submit"}
+          disabled={isReplying}>
             <FaPaperPlane />
             <p className={`text-md font-semibold`}>Reply</p>
-          </div>
+          </button>
           <div
             className="border border-gray-300 py-2 px-2 rounded-md hover:shadow hover:cursor-pointer hover:bg-gray-100 transition duration-700"
             onClick={() => setIsOpen(false)}
@@ -72,6 +113,7 @@ const CommentCard = ({ comment }) => {
             <p className={`text-md font-semibold`}>Cancel</p>
           </div>
         </div>
+        </form>
       </div>
     </div>
   );

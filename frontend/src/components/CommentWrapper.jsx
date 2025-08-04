@@ -2,7 +2,7 @@
 import React from "react";
 import CommentCard from "./CommentCard"; // Import the CommentCard component you just updated
 
-const Comment = ({ comment, depth = 0 }) => {
+const Comment = ({ comment, depth = 0, parentType, parentId }) => {
   // Determine indentation based on depth
   // Each level indents by pl-6 (24px) for the whole card
   const indentationClass = depth > 0 ? `pl-6` : "";
@@ -28,15 +28,15 @@ const Comment = ({ comment, depth = 0 }) => {
         ></div>
       )}
 
-      {/* Render the actual CommentCard, passing the comment data down */}
-      <CommentCard key={comment._id} comment={comment} />
+      {/* Render the actual CommentCard, passing the comment data and postId down */}
+      <CommentCard key={comment._id} comment={comment} parentType={parentType} parentId={parentId} />
 
       {/* Recursively render replies */}
       {comment.replies && comment.replies.length > 0 && (
         // No extra div or margin here, as the next Comment component will handle its own marginTopClass
         <div>
           {comment.replies.map((reply) => (
-            <Comment key={reply._id} comment={reply} depth={depth + 1} /> // Recursively call Comment with increased depth
+            <Comment key={reply._id} comment={reply} depth={depth + 1} parentType={parentType} parentId={parentId} /> // Recursively call Comment with increased depth
           ))}
         </div>
       )}
